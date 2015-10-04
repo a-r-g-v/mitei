@@ -35,11 +35,19 @@ func Setup() {
 	run("-t", "nat", "-I", "PREROUTING", "-j", my_chain)
 }
 
-func Allocate(targetIPv4addr string, targetPort string, boundPort string) {
-	run("-t", "nat", "-I", my_chain, "-p", "tcp", "--dport", boundPort, "-j", "DNAT", "--to-destination", net.JoinHostPort(targetIPv4addr, targetPort))
+func Allocate(targetIPv4addr string, targetPort string, boundPort string) (string, error) {
+	_, stderr, err := run("-t", "nat", "-I", my_chain, "-p", "tcp", "--dport", boundPort, "-j", "DNAT", "--to-destination", net.JoinHostPort(targetIPv4addr, targetPort))
+	if err != nil {
+		return stderr, err
+	}
+	return "", nil
 
 }
 
-func Release(targetIPv4addr string, targetPort string, boundPort string) {
-	run("-t", "nat", "-D", my_chain, "-p", "tcp", "--dport", boundPort, "-j", "DNAT", "--to-destination", net.JoinHostPort(targetIPv4addr, targetPort))
+func Release(targetIPv4addr string, targetPort string, boundPort string) (string, error) {
+	_, stderr, err := run("-t", "nat", "-D", my_chain, "-p", "tcp", "--dport", boundPort, "-j", "DNAT", "--to-destination", net.JoinHostPort(targetIPv4addr, targetPort))
+	if err != nil {
+		return stderr, err
+	}
+	return "", nil
 }

@@ -34,10 +34,14 @@ func init() {
 
 func Allocate(tIP string, tPort string, bPort string) bool {
 
-	punch.Allocate(tIP, tPort, bPort)
+	stderr, err := punch.Allocate(tIP, tPort, bPort)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Allocate error:%s:%s \n", err, stderr)
+		return false
+	}
 
 	l := Table{TargetIP: tIP, TargetPort: tPort, BoundPort: bPort}
-	err := DB.Create(&l).Error
+	err = DB.Create(&l).Error
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Allocate error:%s \n", err)
 		return false
@@ -47,9 +51,13 @@ func Allocate(tIP string, tPort string, bPort string) bool {
 
 func Release(tIP string, tPort string, bPort string) bool {
 
-	punch.Release(tIP, tPort, bPort)
+	stderr, err := punch.Release(tIP, tPort, bPort)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Release error:%s:%s \n", err, stderr)
+		return false
+	}
 
-	err := DB.Debug().Where("target_ip = ?", tIP).Where("target_port = ?", tPort).Where("bound_port = ?", bPort).Delete(&Table{}).Error
+	err = DB.Debug().Where("target_ip = ?", tIP).Where("target_port = ?", tPort).Where("bound_port = ?", bPort).Delete(&Table{}).Error
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Release error:%s \n", err)
 		return false
